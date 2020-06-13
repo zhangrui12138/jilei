@@ -1,0 +1,293 @@
+    \\192.168.1.119\pcba\fotatools
+	(这个链接下载速度要快)
+
+    第二步：
+
+    下载之后在VMware上安装ubuntu。安装完成后，用update manager更新最新的pach。创建用户zhenwx和samba用户zhenwx和密码
+
+在64位WIN7系统安装64位UBUNTU12.04
+1，安装vmware8.0.2
+
+安装完成vmware8.0.2后，打开vmware8.0.2，在Edit菜单打开Virtual Network Editor子菜单，在下面的Vmnet8子项点击，对话框下面的subnet IP 为192.168.128.0，subnet mask为255.255.255.0. 如果不是就改为这个配置。点击DHCP settings按钮进入IP设置，在Start IP address 对话框填入192.168.128.128，在End IP address 对话框填入192.168.128.129，点击ok保存，这样IP地址就固定到192.168.128.128，方便后面和windows互相访问。
+
+VM setting 选项的配置
+
+内存配置一般为物理内存的1半，比如4G内存，那么这里选2G大小，选择太大会影响windows的性能。
+
+处理器的配置，如果是I5的处理器选择4 processor，1 core per processor。
+
+                  如果是T7500的处理器选择2 processor，1 core per processor。
+
+这里配置不对，cpu的不能够充分发挥到最好的性能。
+
+
+
+
+
+
+2,安装ubuntu
+下载 ubuntu-ubuntu-12.04-desktop-amd64
+file-->new virtual machine
+菜单VM--》setting-->hardware--》CD/DVD-->use ISO image file选择ubuntu-12.04-desktop-amd64
+一步一步安装，安装过程要输入主机名字zhenwx和登录用户名zhenwx和登录密码，大概两个小时安装完成。
+3，点击下拉菜单dash home打开dash home，地址栏输入update，弹出菜单 update manager---->install updates下载安装更新。
+    下载150M的更新包和安装，慢慢等待。
+要打开terminal，按快捷键: Ctrl + Alt + t 即可
+
+4，安装samba
+ sudo apt-get install samba samba-common
+ 点击菜单ubuntu software center， 地址栏输入samba，选择samba软件，点击install进入安装samba，
+ 安装好samba后，在菜单有个samba图标，点击弹出samba设置菜单，samba--》add a samba share （+号）--》 create samba share
+ basic--》directory browser --》file system --》home  --》zhenwx  /home/zhenwx文件夹共享给zhenwx用户，设置为可以读写（writable visable 打勾）
+ access--》only allow access specific user 前面打勾--》 在zhenwx前面打勾
+ sudo smbpasswd -a zhenwx  
+ 为samba用户设置密码，否则win7不能够访问
+5，ifconfig 看看ip地址192.168.241.136
+6，在windos 的地址栏\\192.168.241.136 可以看到zhenwx目录，弹出widows安全对话框，输入samba用户名和密码
+7，安装ssh
+    sudo apt-get install openssh-server openssh-client
+
+ 在WIN7端连接
+secureCRT => Quick Connect, 连接ubuntu, 输入ubuntu的id和pwd
+hostname  192.168.241.136
+username  zhenwx
+连接后
+Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.2.0-24-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+zhenwx@zhenwx-virtual-machine:~$
+
+说明secureCRT就可以登录上ubuntu12.04了
+注意：
+如果没有安装ssh，在secureCRT会提示
+
+The remote system refused the connection.
+
+要设置secureCRT支持中文，在options---》session options--》appearance---character encoding 选择UTF-8就可以
+
+secureCRT的鼠标右键功能默认是粘贴的功能，用起来和windows系统的风格不一致，如果要改为右键为弹出文本操作菜单功能，方便对选择的内容做拷贝编辑操作，可以在options菜单----》global options------》terminal-------》mouse子菜单对 paste  on  right button的选项不要打勾就可以
+
+
+8，安装SVN
+sudo apt-get install subversion
+
+9，安装jdk
+在windows将jdk下载，通过samba传给ubuntu
+    cd  /usr
+  sudo mkdir java
+  cd java     
+  sudo cp ../../home/zhenwx/jdk-6u27-linux-x64.bin  .
+  sudo chmod 777 jdk-6u27-linux-x64.bin
+    执行jdk的安装.
+    sudo  ./jdk-6u27-linux-x64.bin
+    配置环境变量d
+    cd /etc
+    sudo cp profiel profile-bak
+    sudo chmod 777 profile
+    vi etc/profile
+    在前面添加下面内容，按ESC按键，wq！    #名字一定得一样
+    export JAVA_HOME=/usr/java/jdk1.6.0_27  
+    export JRE_HOME=$JAVA_HOME/jre  
+    export CLASSPATH=$JAVA_HOME/lib:$JRE_HOME/lib:$CLASSPATH  
+    export PATH=$JAVA_HOME/bin:$PATH:$JRE_HOME/bin
+  查看jdk是否安装成功
+zhenwx@zhenwx-desktop:/etc$ source ./profile
+zhenwx@zhenwx-desktop:/etc$ java -version
+java version "1.6.0_27"
+Java(TM) SE Runtime Environment (build 1.6.0_27-b07)
+Java HotSpot(TM) 64-Bit Server VM (build 20.2-b06, mixed mode)
+zhenwx@zhenwx-desktop:/etc$
+    如果显示上面信息说明安装成功
+
+
+
+
+
+
+10，安装编译Android需要的工具包，这个步骤是关键，必须安装，否则编译会报莫名其妙的错误！！！！！！！！！！！！！！！！
+sudo apt-get install git-core gnupg flex bison gperf build-essential   zip curl zlib1g-dev libc6-dev lib32ncurses5-dev ia32-libs   x11proto-core-dev libx11-dev lib32readline-gplv2-dev lib32z1-dev   libgl1-mesa-dev gcc-multilib g++-multilib mingw32 tofrodos python-markdown   libxml2-utils  xsltproc
+
+
+
+注意：
+a.64位系统要安装gcc-multilib g++-multilib，32位系统不需要装.
+b.Ubuntu 10.04需要添加额外的源才能安装Java5
+deb http://cn.archive.ubuntu.com/ubuntu/ jaunty multiverse
+deb http://cn.archive.ubuntu.com/ubu..
+如果没有安装 bison会编译报错
+sudo sudo apt-get install bison
+（ /bin/bash: bison: command not found ）
+（/bin/bash: prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-gcc: No such file or directory）
+
+
+
+Ubuntu 中的 root 帐号默认是被禁用了的。在这种情况之下，如果你想要使用 root 的权限来干些事情，就需要 sudo 命令。如果你需要激活 Ubuntu 中的 root 帐号，在 Ubuntu 中激活 root 帐号的过程如下：
+
+A. 在终端执行 sudo passwd root指令后，系统将会提示你设置一个新的 root 帐号密码。
+
+B. 点击 System -> Preferences -> Login Window 菜单，并切换到 Security 选项页，然后选中其下的“Allow local system administrator login”选项。
+
+执行上述两步后，你便可以使用 root 帐号登录 Ubuntu 系统了。通过su命令就可以切换到root用户。
+
+如果要再次禁用 root 帐号，那么可以执行 sudo passwd -l root锁住 root 帐号
+11，在菜单system--》preferences--》monitors选择显示的分辨率1280×800
+
+
+12，UBUNTU12.04基本android2.3/android4.0开发环境安装成功了
+
+
+如果你觉得主机名不合适，也可以改配置文件修改。比如将主机名zhenwx改为android
+　　要修改两个文件
+
+　　1、修改 /etc/hostname 下的主机名；将zhenwx字符串改为android
+
+　　2、修改 /etc/hosts 文件，替换原主机名，我替换的是 127.0.1.1 后的主机名，
+            将zhenwx字符串改为android
+　　3、使用 hostname 进行测试
+
+
+    第三步：
+
+    在自己工作目录下或某个文件夹下建立bin目录，我的是在/home/zhenwx/
+
+    确保你已经安装了git jdk python等.
+
+    1.创建bin目录，并加入到PATH
+
+    $ mkdir ~/bin
+    $ PATH=~/bin:$PATH
+
+    2.下载repo到刚刚创建的bin目录，并设置权限为可执行。
+
+    $ curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
+    $ chmod a+x ~/bin/repo
+
+    3.创建Android源代码存放目录并进入到该目录
+
+    $ mkdir Android-4.0.0_r1
+
+    $ cd Android-4.0.0_r1
+
+    4.初始化Android4.0.1的Git库
+
+    $ repo init -u https://android.googlesource.com/platform/manifest -b android-4.0.1_r1
+
+    这里需要一个google帐号 输入你的用户名和 邮箱地址
+
+5.最后执行开始同步下载
+
+$ repo sync
+
+    最后，编译。
+
+    第一步：
+
+    在存放代码的那个文件夹下（Android-4.0.0_r1），执行：
+
+    $ source build/envsetup.sh 
+
+    其中，build是源码目录中一个文件夹。
+
+
+    第二步：
+
+    执行：
+
+    $ lunch full-eng
+
+
+    第三步：
+
+    $make  -j4
+
+    等着编译完成就行了。
+
+
+
+
+
+
+最新源
+deb http://mirrors.163.com/ubuntu/ precise main universe restricted multiverse
+deb-src http://mirrors.163.com/ubuntu/ precise main universe restricted multiverse
+deb http://mirrors.163.com/ubuntu/ precise-security universe main multiverse restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-security universe main multiverse restricted
+deb http://mirrors.163.com/ubuntu/ precise-updates universe main multiverse restricted
+deb http://mirrors.163.com/ubuntu/ precise-proposed universe main multiverse restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-proposed universe main multiverse restricted
+deb http://mirrors.163.com/ubuntu/ precise-backports universe main multiverse restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-backports universe main multiverse restricted
+deb-src http://mirrors.163.com/ubuntu/ precise-updates universe main multiverse restricted
+
+sudo apt-get update 
+
+
+
+sudo apt-get install  zip curl libc6-dev libncurses5-dev
+
+sudo apt-get install  x11proto-core-dev    libx11-dev libreadline6-dev libgl1-mesa-glx
+或者：
+sudo apt-get install  x11proto-core-dev    libx11-dev libreadline6-dev libgl1-mesa-dri
+ 
+
+sudo apt-get install libgl1-mesa-dev g++-multilib mingw32 tofrodos
+
+sudo apt-get install  python-markdown libxml2-utils xsltproc zlib1g-dev
+
+sudo apt-get install lib32readline6-dev gcc-4.4 g++-4.4 g++-4.4-multilib gcc-4.4-multilib
+
+安装JDK
+sudo apt-get install openjdk-7-jdk
+
+配置环境变量
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+export PATH=${JAVA_HOME}/bin:${JRE_HOME}/bin:$PATH
+
+
+解决办法：
+
+在终端输入：apt-get -f install
+
+然后在输入：
+
+sudo apt-get install flex
+
+哈哈，解决了
+
+sudo apt-get 
+
+
+sudo apt-get install testdisk 恢复系统文件
+
+更新面板，登录时切换登录方式即可
+sudo apt-get install gnome-panel
+
+
+直接安装ADB
+sudo add-apt-repository ppa:nilarimogard/webupd8
+sudo apt-get update
+sudo apt-get install android-tools-adb android-tools-fastboot
+
+
+http://mg.adups.cn/ota/login.jsp?out=1
+
+
+
+https://www.cnblogs.com/wxishang1991/p/5662499.html
+
+make package:
+https://jingyan.baidu.com/article/6d704a13f9981a28da51ca70.html
+
+fota client:
+smb://192.168.1.119/pcba/fotatools/fota928
